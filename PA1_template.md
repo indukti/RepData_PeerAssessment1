@@ -15,7 +15,8 @@ dataInit$date <- as.Date(as.character(dataInit$date))
 library(dplyr)
 
 dataTotal <- dataInit %>% filter(is.na(steps) == FALSE) %>% group_by(date) %>% summarize(steps = sum(steps))
-hist(dataTotal$steps, col = "red", main = "Histogram of the total number of steps taken each day (NAs excl)", xlab = "Steps", ylab = "Number of days")
+hist(dataTotal$steps, col = "red", main = "Histogram of the total number of steps taken each day (NAs excl)", 
+      xlab = "Steps", ylab = "Number of days")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
@@ -44,9 +45,11 @@ median(dataTotal$steps)
 ## What is the average daily activity pattern?
 
 ```r
-dataActivityAverage <- dataInit %>% filter(is.na(steps) == FALSE) %>% group_by(interval) %>% summarize(steps = mean(steps))
+dataActivityAverage <- dataInit %>% filter(is.na(steps) == FALSE) %>% group_by(interval) %>% 
+      summarize(steps = mean(steps))
 
-plot(dataActivityAverage$interval, dataActivityAverage$steps, type="l", col = "red", main = "Average number of steps in intervals", xlab = "Interval", ylab = "Number of steps")
+plot(dataActivityAverage$interval, dataActivityAverage$steps, type="l", col = "red", 
+      main = "Average number of steps in intervals", xlab = "Interval", ylab = "Number of steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
@@ -78,13 +81,16 @@ The strategy for filling in all of the missing values in the dataset: **use the 
 
 ```r
 # 1st step - create a data frame with interval means
-dataMeanStepsByInterval <- dataInit %>% select(steps, interval) %>% filter(is.na(steps) == FALSE) %>% group_by(interval) %>% summarize(meanSteps = mean(steps)) %>% select(meanSteps, interval)
+dataMeanStepsByInterval <- dataInit %>% select(steps, interval) %>% filter(is.na(steps) == FALSE) %>% 
+      group_by(interval) %>% summarize(meanSteps = mean(steps)) %>% select(meanSteps, interval)
 
 # 2nd step - join the data frame created in the 1st point with the initial data frame and replace NAs in the steps columns
-dataImputted <- dataInit %>% inner_join(dataMeanStepsByInterval, by = "interval") %>% mutate(steps = ifelse(is.na(steps), meanSteps, steps))
+dataImputted <- dataInit %>% inner_join(dataMeanStepsByInterval, by = "interval") %>% 
+      mutate(steps = ifelse(is.na(steps), meanSteps, steps))
 
 dataTotalImputted <- dataImputted %>% group_by(date) %>% summarize(steps = sum(steps))
-hist(dataTotalImputted$steps, col = "blue", main = "Histogram of the total number of steps taken each day (NAs replaced)", xlab = "Steps", ylab = "Number of days")
+hist(dataTotalImputted$steps, col = "blue", main = "Histogram of the total number of steps taken each day (NAs replaced)",
+      xlab = "Steps", ylab = "Number of days")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
@@ -119,9 +125,13 @@ What is the impact of imputing missing data on the estimates of the total daily 
 library(lattice)
 Sys.setlocale("LC_TIME", "en_US.UTF-8")
 
-dataActivityByWeekpart <- dataImputted %>% mutate(day = weekdays(date)) %>% mutate(weekpart = as.factor(ifelse(day == "Saturday" | day == "Sunday", "weekend", "weekday"))) %>% group_by(.dots = c("interval", "weekpart")) %>% summarize(steps = mean(steps))
+dataActivityByWeekpart <- dataImputted %>% mutate(day = weekdays(date)) %>% 
+      mutate(weekpart = as.factor(ifelse(day == "Saturday" | day == "Sunday", "weekend", "weekday"))) %>% 
+      group_by(.dots = c("interval", "weekpart")) %>% summarize(steps = mean(steps))
 
-xyplot(steps ~ interval | weekpart, data = dataActivityByWeekpart, main = "Avg number of steps in intervals during weekend days and weekdays", layout = c(1,2), type = "l", col = "blue", xlab = "Interval", ylab = "Number of steps" )
+xyplot(steps ~ interval | weekpart, data = dataActivityByWeekpart, 
+      main = "Avg number of steps in intervals during weekend days and weekdays", layout = c(1,2), type = "l", 
+      col = "blue", xlab = "Interval", ylab = "Number of steps" )
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
